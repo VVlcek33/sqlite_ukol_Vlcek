@@ -15,20 +15,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'add') {
         $name = trim($_POST['name'] ?? '');
-                $_SESSION['message'] = 'Pole nesmí být prázdné.';
-            } else {
-                try {
-                    $stmt = $db->prepare("INSERT INTO interests (name) VALUES (?)");
-                    $stmt->execute([$name]);
-                    $_SESSION['message'] = 'Zájem byl přidán.';
-                } catch (PDOException $e) {
-                    if ($e->getCode() == 23000) { // UNIQUE constraint failed
-                        $_SESSION['message'] = 'Tento zájem již existuje.';
-                    } else {
-                        $_SESSION['message'] = 'Došlo k chybě.';
-                    }
+        if (empty($name)) {
+            $_SESSION['message'] = 'Pole nesmí být prázdné.';
+        } else {
+            try {
+                $stmt = $db->prepare("INSERT INTO interests (name) VALUES (?)");
+                $stmt->execute([$name]);
+                $_SESSION['message'] = 'Zájem byl přidán.';
+            } catch (PDOException $e) {
+                if ($e->getCode() == 23000) { // UNIQUE constraint failed
+                    $_SESSION['message'] = 'Tento zájem již existuje.';
+                } else {
+                    $_SESSION['message'] = 'Došlo k chybě.';
                 }
             }
+        }
         header("Location: index.php");
         exit;
     } elseif ($action === 'edit') {
